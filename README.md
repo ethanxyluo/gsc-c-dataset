@@ -56,9 +56,43 @@ Run:
 ```
 python audio_mixer.py
 ```
+
+Default configuration (edit in `audio_mixer.py` → `main`):
+- ESC categories (by TARGET indices): `[0, 5, 17, 19, 20, 26, 35, 36, 43, 48]`
+- SNR levels: `[-20, -15]`
+- Paths: `gsc_dir='speech_commands'`, `esc50_dir='esc50'`, `output_dir='processed_dataset'`
+
+Notes:
+- `process_google_sample` only keeps 1-second (16000 samples) inputs. Others are skipped.
+- Silence is sampled from `_background_noise_` in 1-second segments.
+
+### 2) Generate playable mixed audio samples (.wav)
+Use this to quickly listen to the mixing quality. By default, it randomly picks one sample per command and mixes it at various SNRs and ESC-50 categories.
+
+Run:
 ```
 python visualize_mixed.py
 ```
+
+Defaults (edit in `visualize_mixed.py`):
+- SNRs: `[-10, 0, 10]`
+- ESC categories (TARGET indices): `[0, 5, 17, 19, 20, 26, 35, 36, 43, 48]`
+- Output dir: `testwav`
+
+
+## Implementation Details
+
+- SNR control
+  - Noise is scaled to the target SNR relative to the speech signal, then added.
+  - Peak normalization is applied to avoid clipping, which may slightly alter the perceived SNR—typically acceptable for robustness testing.
+
+- MFCC
+  - 16 kHz sampling rate, 40 ms window, 20 ms hop, 40 coefficients.
+  - `audio_mixer.py` normalizes features per output directory using mean/std computed over that directory.
+
+- Categories
+  - `audio_mixer.py` maps ESC-50 TARGET indices to human-readable names for output paths.
+  - `visualize_mixed.py` uses `esc_{index}` for folder names.
 
 ## Reference
 - GSC: Warden, P. “Speech Commands: A Dataset for Limited-Vocabulary Speech Recognition.”
